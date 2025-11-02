@@ -306,12 +306,4 @@ Return as array of reviews.
         return saved_files
 
 
-def get_parsebot_client() -> ParseBotClient:
-    """Get configured parse.bot client."""
-    api_key = os.getenv("PARSEBOT_API_KEY")
-    
-    if not api_key:
-        raise ValueError("PARSEBOT_API_KEY not set in environment")
-    
-    return ParseBotClient(api_key)
 

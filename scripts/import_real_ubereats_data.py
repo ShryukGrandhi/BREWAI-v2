@@ -24,16 +24,16 @@ async def main():
     # Your restaurant ID from the URL
     restaurant_id = "57965626-1c94-5aa5-868d-c847cb861236"
     
-    print(f"📍 Restaurant ID: {restaurant_id}")
+    print(f"[*] Restaurant ID: {restaurant_id}")
     print()
-    print("🔄 Starting data extraction...")
+    print("[*] Starting data extraction...")
     print("   This will:")
     print("   1. Navigate to your Uber Eats dashboard")
     print("   2. Extract orders, revenue, menu items")
     print("   3. Extract customer reviews and ratings")
     print("   4. Replace demo data with your real data")
     print()
-    print("⏱️  This may take 2-3 minutes...")
+    print("[*] This may take 2-3 minutes...")
     print()
     
     try:
@@ -43,24 +43,24 @@ async def main():
         if result.get('success'):
             print()
             print("="*60)
-            print("  ✅ SUCCESS! Real data imported")
+            print("  [SUCCESS] Real data imported")
             print("="*60)
             print()
             
             data = result.get('data', {})
             
-            print("📊 Data Summary:")
+            print("[DATA] Summary:")
             print(f"   Orders: {len(data.get('orders', []))}")
             print(f"   Menu Items: {len(data.get('menu', []))}")
             print(f"   Reviews: {len(data.get('reviews', []))}")
             print()
             
-            print("💾 Files Updated:")
+            print("[SAVE] Files Updated:")
             for artifact in result.get('artifacts', []):
-                print(f"   ✅ {artifact}")
+                print(f"   [OK] {artifact}")
             print()
             
-            print("🚀 Next Steps:")
+            print("[NEXT] Steps:")
             print("   1. Refresh your Streamlit app: http://localhost:8501")
             print("   2. You'll now see YOUR actual restaurant data!")
             print("   3. All forecasts and analytics use real numbers")
@@ -68,10 +68,10 @@ async def main():
             
         else:
             print()
-            print("❌ ERROR during import:")
+            print("[ERROR] Import failed:")
             print(f"   {result.get('error')}")
             print()
-            print("💡 Troubleshooting:")
+            print("[TIP] Troubleshooting:")
             print("   1. Make sure you're logged into Uber Eats in Chrome")
             print("   2. Check that BROWSER_USE_API_KEY is set in .env")
             print("   3. Verify the restaurant ID is correct")
@@ -79,7 +79,7 @@ async def main():
     
     except Exception as e:
         print()
-        print(f"❌ EXCEPTION: {e}")
+        print(f"[EXCEPTION] {e}")
         print()
     
     print("="*60)

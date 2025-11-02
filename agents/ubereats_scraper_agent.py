@@ -58,21 +58,35 @@ class UberEatsScraperAgent:
                 )
             
             dashboard_task = f"""
-Navigate to https://merchants.ubereats.com/manager/home/{self.restaurant_id}
+STEP 1: Navigate to https://merchants.ubereats.com/manager/home/{self.restaurant_id}
 
-Wait for the page to fully load.
+STEP 2: Wait 5 seconds for page to fully load
 
-Extract the following data:
-1. Today's orders count
-2. Today's revenue
-3. Order status breakdown (completed, in-progress, cancelled)
-4. Recent orders with: order number, time, items, total amount, customer name
-5. Current menu items visible on the page
+STEP 3: Look for and extract these visible elements:
+- Total orders today (usually in a metric card or header)
+- Total revenue today (dollar amount)  
+- Order status counts (completed, active, cancelled)
 
-Save all extracted data in a structured format.
+STEP 4: Scroll down to find recent orders table/list
+
+STEP 5: For each visible order, extract:
+- Order number/ID
+- Time placed
+- Items ordered
+- Total amount
+- Status
+
+STEP 6: Click on "Orders" or "Order History" if available to see more details
+
+STEP 7: Extract at least 20-30 recent orders with full details
+
+STEP 8: Take a screenshot and save the extracted data
 """
             
-            dashboard_result = await browser.execute_task(dashboard_task, max_steps=15)
+            print("[BROWSER] Navigating to Uber Eats dashboard...")
+            print(f"[URL] https://merchants.ubereats.com/manager/home/{self.restaurant_id}")
+            
+            dashboard_result = await browser.execute_task(dashboard_task, max_steps=25)
             
             if self.trace:
                 self.trace.log(
@@ -83,20 +97,33 @@ Save all extracted data in a structured format.
             
             # Task 2: Navigate to orders page for detailed history
             orders_task = f"""
-Go to the Orders section in the Uber Eats merchant dashboard.
+STEP 1: Look for "Orders" or "Order History" link in the navigation menu
 
-Extract detailed order history including:
-- Order ID
-- Date and time
-- Items ordered (name, quantity, price)
-- Subtotal, fees, total
-- Delivery method (delivery, pickup, dine-in)
-- Customer notes if any
+STEP 2: Click it to go to the orders page
 
-Get at least the last 30 orders.
+STEP 3: Wait for orders table to load
+
+STEP 4: For each row in the orders table, extract:
+- Order ID (usually starts with #)
+- Date and timestamp
+- Customer name (if visible)
+- Items (full list with quantities)
+- Subtotal
+- Delivery fee
+- Total amount
+- Order status (completed/cancelled/refunded)
+- Delivery method (delivery/pickup)
+
+STEP 5: If there's a "Load More" or pagination, click to see more orders
+
+STEP 6: Extract at least 30 orders total
+
+STEP 7: Export or copy the data in structured format
 """
             
-            orders_result = await browser.execute_task(orders_task, max_steps=20)
+            print("[BROWSER] Navigating to Orders section...")
+            
+            orders_result = await browser.execute_task(orders_task, max_steps=30)
             
             if self.trace:
                 self.trace.log(
@@ -107,20 +134,33 @@ Get at least the last 30 orders.
             
             # Task 3: Extract menu data
             menu_task = f"""
-Navigate to the Menu section of the Uber Eats merchant dashboard.
+STEP 1: Find and click "Menu" or "Items" in the navigation
 
-Extract all menu items with:
+STEP 2: Wait for menu items to load
+
+STEP 3: For each menu item visible, extract:
 - Item name
-- Description
 - Price
-- Category
-- Availability status
-- Customization options if visible
+- Description
+- Category (burger, sides, drinks, etc.)
+- Status (available/unavailable)
+- Image URL if available
 
-Get the complete active menu.
+STEP 4: If menu is paginated or categorized, navigate through all sections:
+- Burgers
+- Sides
+- Drinks  
+- Combos
+- Etc.
+
+STEP 5: Extract complete menu with all items
+
+STEP 6: Note which items are your best sellers (if that data is visible)
 """
             
-            menu_result = await browser.execute_task(menu_task, max_steps=15)
+            print("[BROWSER] Navigating to Menu section...")
+            
+            menu_result = await browser.execute_task(menu_task, max_steps=25)
             
             if self.trace:
                 self.trace.log(
@@ -131,19 +171,28 @@ Get the complete active menu.
             
             # Task 4: Extract reviews/ratings
             reviews_task = f"""
-Navigate to the Reviews or Ratings section.
+STEP 1: Find and click "Reviews", "Ratings", or "Feedback" in navigation
 
-Extract customer reviews including:
-- Rating (stars)
-- Review text
-- Date
-- Order items mentioned
-- Response status
+STEP 2: Wait for reviews to load
 
-Get at least 15-20 recent reviews.
+STEP 3: For each review, extract:
+- Star rating (1-5 stars)
+- Review text/comment
+- Date posted
+- Items ordered (if mentioned)
+- Your response (if any)
+- Thumbs up/down if available
+
+STEP 4: Scroll to load more reviews
+
+STEP 5: Extract at least 15-20 recent reviews
+
+STEP 6: Note overall rating average if displayed
 """
             
-            reviews_result = await browser.execute_task(reviews_task, max_steps=15)
+            print("[BROWSER] Navigating to Reviews section...")
+            
+            reviews_result = await browser.execute_task(reviews_task, max_steps=25)
             
             if self.trace:
                 self.trace.log(

@@ -29,15 +29,22 @@ async def main():
     print()
     
     async with async_playwright() as p:
-        print("[LAUNCH] Opening Chrome...")
+        print("[LAUNCH] Opening Chrome with your signed-in profile...")
         
-        browser = await p.chromium.launch(
+        user_data_dir = r"C:\Users\shryu\AppData\Local\Google\Chrome\User Data"
+        profile_dir = "Default"
+        
+        print(f"[PROFILE] Using: {user_data_dir}\\{profile_dir}")
+        print("[INFO] You should be ALREADY logged in!")
+        print()
+        
+        # Launch persistent context (your Chrome profile)
+        context = await p.chromium.launch_persistent_context(
+            user_data_dir,
             headless=False,
-            slow_mo=1000  # Slow down for stability
-        )
-        
-        context = await browser.new_context(
-            viewport={'width': 1920, 'height': 1080}
+            channel="chrome",
+            args=[f'--profile-directory={profile_dir}'],
+            slow_mo=1000
         )
         
         page = await context.new_page()
@@ -47,21 +54,19 @@ async def main():
         
         print()
         print("="*60)
-        print("  WAITING FOR LOGIN")
+        print("  AUTOMATIC EXTRACTION IN 10 SECONDS")
         print("="*60)
         print()
-        print("If you're not logged in:")
-        print("   1. Log in to Uber Eats in the browser that just opened")
-        print("   2. Navigate to your dashboard")
-        print("   3. Press ENTER here when ready")
-        print()
-        print("If you're already logged in, just press ENTER")
+        print("Using your signed-in Chrome profile - no login needed!")
+        print("Waiting for dashboard to fully load...")
         print()
         
-        input("Press ENTER when dashboard is loaded...")
+        for i in range(10, 0, -2):
+            print(f"   Starting in {i} seconds...")
+            await asyncio.sleep(2)
         
         print()
-        print("[OK] Starting automatic extraction...")
+        print("[OK] Starting AUTOMATIC extraction...")
         print()
         
         # Wait for dashboard to be fully loaded
@@ -157,10 +162,14 @@ async def main():
         print()
         print("[NEXT] Refresh Streamlit: http://localhost:8501")
         print()
+        print("[CLOSE] Closing browser in 10 seconds...")
+        print("   Check the extracted data!")
+        await asyncio.sleep(10)
         
-        input("Press ENTER to close browser...")
+        await context.close()
         
-        await browser.close()
+        print()
+        print("[DONE] Browser closed. Data is ready!")
 
 
 def extract_orders_from_html(html: str, text: str) -> list:

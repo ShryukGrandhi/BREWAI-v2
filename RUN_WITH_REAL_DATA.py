@@ -43,17 +43,46 @@ async def scrape_ubereats():
             user_data_dir,
             headless=False,
             channel="chrome",
-            args=['--profile-directory=Default'],
-            slow_mo=500
+            args=[
+                '--profile-directory=Default',
+                '--disable-blink-features=AutomationControlled',
+                '--disable-dev-shm-usage'
+            ],
+            slow_mo=500,
+            ignore_default_args=['--enable-automation', '--enable-blink-features=AutomationControlled']
         )
         
-        page = await context.new_page()
+        # Get the first page (should be about:blank)
+        pages = context.pages
+        if pages:
+            page = pages[0]
+        else:
+            page = await context.new_page()
         
         print(f"[GO] Navigating to Uber Eats Manager...")
-        await page.goto(dashboard_url, wait_until='domcontentloaded', timeout=60000)
+        print(f"[URL] {dashboard_url}")
         
-        print("[WAIT] Loading dashboard (15 seconds)...")
+        try:
+            response = await page.goto(dashboard_url, wait_until='load', timeout=60000)
+            print(f"[OK] Response: {response.status if response else 'N/A'}")
+        except Exception as e:
+            print(f"[WARN] Navigation issue: {e}")
+            print("[RETRY] Trying again...")
+            await page.goto(dashboard_url, timeout=60000)
+        
+        print("[WAIT] Waiting for page to fully render...")
+        
+        # Wait longer for dynamic content
         await asyncio.sleep(15)
+        
+        # Check if we're on the right page
+        current_url = page.url
+        print(f"[CHECK] Current URL: {current_url}")
+        
+        if 'ubereats.com' not in current_url:
+            print("[ERROR] Not on Uber Eats! May need to log in.")
+            print("[WAIT] Giving 20 more seconds for redirect/login...")
+            await asyncio.sleep(20)
         
         print("[EXTRACT] Capturing page data...")
         

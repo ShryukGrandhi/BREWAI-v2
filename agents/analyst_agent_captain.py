@@ -239,7 +239,7 @@ class AnalystAgentCaptain:
             return results
     
     def _load_tenant_documents(self) -> List[Dict[str, Any]]:
-        """Load tenant documents for Captain upload."""
+        """Load tenant documents for Captain upload INCLUDING REAL CSV DATA."""
         documents = []
         base_path = "data/tenant_demo"
         
@@ -250,7 +250,8 @@ class AnalystAgentCaptain:
             "menu.md": "Restaurant Menu",
             "prep.md": "Prep Guidelines",
             "ops.md": "Operations Manual",
-            "weather_rules.md": "Weather Planning Rules"
+            "weather_rules.md": "Weather Planning Rules",
+            "realtime_operations.md": "Real-Time Operations Guide"
         }
         
         for filename, title in file_map.items():
@@ -268,6 +269,80 @@ class AnalystAgentCaptain:
                             "type": "knowledge_base"
                         }
                     })
+        
+        # LOAD REAL CSV DATA for real-time operations
+        import pandas as pd
+        from datetime import datetime
+        
+        csv_files = {
+            "orders_realtime.csv": "Real-Time Orders",
+            "customer_reviews.csv": "Customer Reviews",
+            "inventory.csv": "Inventory Status",
+            "staff_schedule.csv": "Staff Schedule"
+        }
+        
+        for csv_filename, csv_title in csv_files.items():
+            csv_path = os.path.join("data", csv_filename)
+            if os.path.exists(csv_path):
+                try:
+                    df = pd.read_csv(csv_path)
+                    
+                    # Convert DataFrame to readable text
+                    csv_content = f"=== {csv_title} (CSV Data) ===\n\n"
+                    csv_content += f"Total Records: {len(df)}\n"
+                    csv_content += f"Columns: {', '.join(df.columns)}\n\n"
+                    
+                    # Add key statistics
+                    if 'price' in df.columns:
+                        csv_content += f"REVENUE METRICS:\n"
+                        csv_content += f"- Total Revenue: ${df['price'].sum():,.2f}\n"
+                        csv_content += f"- Average Order: ${df['price'].mean():.2f}\n"
+                        csv_content += f"- Min Order: ${df['price'].min():.2f}\n"
+                        csv_content += f"- Max Order: ${df['price'].max():.2f}\n\n"
+                    
+                    if 'rating' in df.columns:
+                        csv_content += f"CUSTOMER SATISFACTION:\n"
+                        csv_content += f"- Average Rating: {df['rating'].mean():.2f}/5.0\n"
+                        csv_content += f"- Total Reviews: {len(df)}\n"
+                        csv_content += f"- 5-Star: {len(df[df['rating']==5])} ({len(df[df['rating']==5])/len(df)*100:.1f}%)\n"
+                        csv_content += f"- 1-Star: {len(df[df['rating']==1])} ({len(df[df['rating']==1])/len(df)*100:.1f}%)\n"
+                        if 'sentiment' in df.columns:
+                            csv_content += f"\nSENTIMENT BREAKDOWN:\n"
+                            sentiment_counts = df['sentiment'].value_counts()
+                            for sent, count in sentiment_counts.items():
+                                csv_content += f"- {sent.capitalize()}: {count} ({count/len(df)*100:.1f}%)\n"
+                        csv_content += "\n"
+                    
+                    if 'current_stock' in df.columns and 'par_level' in df.columns:
+                        csv_content += f"INVENTORY STATUS:\n"
+                        csv_content += f"- Total Items: {len(df)}\n"
+                        low_stock = df[df['current_stock'] < df['par_level']]
+                        csv_content += f"- Low Stock: {len(low_stock)} items\n"
+                        if len(low_stock) > 0:
+                            csv_content += f"- REORDER NEEDED: {', '.join(low_stock['item'].tolist())}\n"
+                        csv_content += "\n"
+                    
+                    # Add sample data (first 5 and last 5 rows)
+                    csv_content += f"SAMPLE DATA (First 5 rows):\n{df.head(5).to_string(index=False)}\n\n"
+                    csv_content += f"RECENT DATA (Last 5 rows):\n{df.tail(5).to_string(index=False)}\n"
+                    
+                    documents.append({
+                        "content": csv_content,
+                        "title": csv_title,
+                        "metadata": {
+                            "source": csv_title,
+                            "filename": csv_filename,
+                            "tenant_id": self.tenant_id,
+                            "type": "realtime_data",
+                            "record_count": len(df),
+                            "updated_at": datetime.now().isoformat()
+                        }
+                    })
+                    
+                    print(f"[OK] Loaded CSV: {csv_filename} ({len(df)} records)")
+                    
+                except Exception as e:
+                    print(f"[WARN] Could not load CSV {csv_filename}: {e}")
         
         # Add reviews if available
         reviews_file = "artifacts/reviews.json"

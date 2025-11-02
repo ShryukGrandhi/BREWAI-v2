@@ -217,7 +217,10 @@ if prompt := st.chat_input("Type your question here..."):
                 
                 captain = get_captain_client()
                 
-                # Build context from current state
+                # Build context from current state + REAL CSV DATA
+                import pandas as pd
+                
+                # Base context
                 context_data = f"""
 Current Status:
 - Date: {st.session_state.get('simulation_date', datetime.now()).strftime('%Y-%m-%d')}
@@ -226,22 +229,59 @@ Current Status:
 
 Restaurant: Burger Queen
 Location: New York City
-
-Available Data:
-- Historical orders
-- Weather forecasts
-- LSTM predictions
-- Sentiment analysis
-- Staffing schedules
 """
                 
-                # Load knowledge base if available
+                # Add REAL-TIME CSV data summaries
+                realtime_context = "\n\n=== REAL-TIME OPERATIONAL DATA ===\n"
+                
+                try:
+                    # Orders data
+                    if os.path.exists("data/orders_realtime.csv"):
+                        orders_df = pd.read_csv("data/orders_realtime.csv")
+                        orders_df['timestamp'] = pd.to_datetime(orders_df['timestamp'])
+                        today = orders_df[orders_df['timestamp'].dt.date == datetime.now().date()]
+                        
+                        realtime_context += f"\nOrders Today: {len(today)} orders, ${today['price'].sum():.2f} revenue"
+                        realtime_context += f"\nChannels: {today['channel'].value_counts().to_dict() if not today.empty else {}}"
+                        realtime_context += f"\nTop Items: {today['item'].value_counts().head(3).to_dict() if not today.empty else {}}"
+                    
+                    # Reviews
+                    if os.path.exists("data/customer_reviews.csv"):
+                        reviews_df = pd.read_csv("data/customer_reviews.csv")
+                        realtime_context += f"\nReviews: {reviews_df['rating'].mean():.1f}/5.0 avg ({len(reviews_df)} total)"
+                        realtime_context += f"\nSentiment: {reviews_df['sentiment'].value_counts().to_dict()}"
+                        neg_reviews = reviews_df[reviews_df['sentiment'] == 'negative']
+                        if len(neg_reviews) > 0:
+                            realtime_context += f"\nRecent Issues: {', '.join(neg_reviews['keywords'].tolist()[-3:])}"
+                    
+                    # Inventory
+                    if os.path.exists("data/inventory.csv"):
+                        inv_df = pd.read_csv("data/inventory.csv")
+                        low_stock = inv_df[inv_df['current_stock'] < inv_df['par_level']]
+                        realtime_context += f"\nInventory: {len(inv_df)} items tracked, {len(low_stock)} below par"
+                        if len(low_stock) > 0:
+                            realtime_context += f"\nNeed Reorder: {', '.join(low_stock['item'].tolist())}"
+                    
+                    # Staff
+                    if os.path.exists("data/staff_schedule.csv"):
+                        staff_df = pd.read_csv("data/staff_schedule.csv")
+                        today_staff = staff_df[staff_df['date'] == datetime.now().strftime('%Y-%m-%d')]
+                        if not today_staff.empty:
+                            realtime_context += f"\nStaff Today: {len(today_staff)} ({', '.join(today_staff['staff_name'].tolist())})"
+                        
+                except Exception as e:
+                    print(f"[WARN] Could not load CSV context: {e}")
+                
+                context_data += realtime_context
+                
+                # Load knowledge base markdown files
                 kb_context = ""
                 kb_files = [
                     "data/tenant_demo/menu.md",
                     "data/tenant_demo/ops.md",
                     "data/tenant_demo/prep.md",
-                    "data/tenant_demo/weather_rules.md"
+                    "data/tenant_demo/weather_rules.md",
+                    "data/tenant_demo/realtime_operations.md"
                 ]
                 
                 for filepath in kb_files:

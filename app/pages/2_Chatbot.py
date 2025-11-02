@@ -74,6 +74,12 @@ with col2:
     auto_speak = st.toggle("🔊 Auto-Speak Responses", value=st.session_state.auto_speak)
     st.session_state.auto_speak = auto_speak
 
+# Initialize voice input state
+if 'voice_input_text' not in st.session_state:
+    st.session_state.voice_input_text = None
+if 'processing_voice' not in st.session_state:
+    st.session_state.processing_voice = False
+
 # Voice input button (if enabled)
 if st.session_state.voice_enabled:
     st.markdown("---")
@@ -82,16 +88,13 @@ if st.session_state.voice_enabled:
     
     with col2:
         if st.button("🎤 Press to Speak", use_container_width=True, type="primary"):
-            st.session_state.listening = True
-            st.info("🎤 Listening... Speak now!")
-            
-            # Inject Web Speech API
+            # Show listening interface
             st.components.v1.html("""
             <div style="text-align: center; padding: 20px;">
-                <button onclick="startVoiceInput()" class="voice-btn listening">
+                <button onclick="startVoiceInput()" class="voice-btn listening" id="voiceBtn">
                     🎤 Listening... Speak now!
                 </button>
-                <p id="transcript" style="color: white; margin-top: 20px;"></p>
+                <p id="transcript" style="color: #4A90E2; margin-top: 20px; font-size: 16px;"></p>
             </div>
             
             <script>
@@ -100,41 +103,81 @@ if st.session_state.voice_enabled:
             recognition.interimResults = true;
             recognition.lang = 'en-US';
             
+            let finalTranscript = '';
+            
             function startVoiceInput() {
                 recognition.start();
                 console.log('Voice recognition started');
+                document.getElementById('transcript').textContent = '🎤 Listening...';
             }
             
             recognition.onresult = (event) => {
-                const transcript = event.results[0][0].transcript;
-                document.getElementById('transcript').textContent = 'You said: ' + transcript;
+                let interimTranscript = '';
                 
-                // Auto-submit after 1 second of silence
-                if (event.results[0].isFinal) {
-                    setTimeout(() => {
-                        // Set the value in Streamlit's text input
-                        const textInput = window.parent.document.querySelector('input[type="text"]');
-                        if (textInput) {
-                            textInput.value = transcript;
-                            textInput.dispatchEvent(new Event('input', { bubbles: true }));
-                        }
-                    }, 500);
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const transcript = event.results[i][0].transcript;
+                    if (event.results[i].isFinal) {
+                        finalTranscript = transcript;
+                        document.getElementById('transcript').textContent = '✅ You said: ' + transcript;
+                        
+                        // Store in sessionStorage to pass to Streamlit
+                        sessionStorage.setItem('voice_input', transcript);
+                        sessionStorage.setItem('voice_timestamp', Date.now());
+                        
+                        // Force page reload to trigger Streamlit processing
+                        setTimeout(() => {
+                            window.parent.location.reload();
+                        }, 1000);
+                    } else {
+                        interimTranscript = transcript;
+                        document.getElementById('transcript').textContent = '🎤 ' + interimTranscript;
+                    }
                 }
             };
             
             recognition.onerror = (event) => {
                 console.error('Speech recognition error:', event.error);
-                document.getElementById('transcript').textContent = 'Error: ' + event.error;
+                document.getElementById('transcript').textContent = '❌ Error: ' + event.error;
             };
             
             recognition.onend = () => {
                 console.log('Voice recognition ended');
+                document.getElementById('voiceBtn').textContent = '✅ Done!';
             };
             
             // Auto-start
             startVoiceInput();
             </script>
             """, height=150)
+
+# Check for voice input from sessionStorage
+voice_input_check = st.components.v1.html("""
+<script>
+const voiceInput = sessionStorage.getItem('voice_input');
+const timestamp = sessionStorage.getItem('voice_timestamp');
+
+if (voiceInput && timestamp) {
+    // Check if it's recent (within 2 seconds)
+    const now = Date.now();
+    if (now - parseInt(timestamp) < 2000) {
+        // Send to Streamlit
+        window.parent.postMessage({
+            type: 'streamlit:setComponentValue',
+            value: voiceInput
+        }, '*');
+        
+        // Clear so it doesn't repeat
+        sessionStorage.removeItem('voice_input');
+        sessionStorage.removeItem('voice_timestamp');
+    }
+}
+</script>
+""", height=0)
+
+# Process voice input if available
+if voice_input_check:
+    st.session_state.voice_input_text = voice_input_check
+    st.session_state.processing_voice = True
 
 st.markdown("---")
 
@@ -153,8 +196,13 @@ with chat_container:
                     st.session_state.speak_message = message["content"]
                     st.rerun()
 
+# Simplified voice mode - use the voice component above
+# Regular chat mode continues below
+st.markdown("---")
+st.markdown("### 💬 Or Type Your Question:")
+
 # Chat input
-if prompt := st.chat_input("Ask about orders, revenue, staffing, or anything..."):
+if prompt := st.chat_input("Type your question here..."):
     # Add user message
     st.session_state.chat_messages.append({"role": "user", "content": prompt})
     

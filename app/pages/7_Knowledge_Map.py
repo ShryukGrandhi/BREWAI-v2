@@ -149,7 +149,7 @@ if st.session_state.get('rebuild_graph') or not os.path.exists("artifacts/knowle
 
 # Load graph data
 if os.path.exists("artifacts/knowledge_graph.json"):
-    with open("artifacts/knowledge_graph.json", 'r') as f:
+    with open("artifacts/knowledge_graph.json", 'r', encoding='utf-8') as f:
         graph_data = json.load(f)
     
     st.success(f"📊 Loaded graph: {len(graph_data['nodes'])} nodes, {len(graph_data['edges'])} edges")

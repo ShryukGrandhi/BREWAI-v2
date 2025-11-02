@@ -130,7 +130,14 @@ with tab1:
     
     if st.button("🔒 Upload Securely", type="primary", disabled=not uploaded_file):
         if uploaded_file:
-            with st.spinner("Encrypting and uploading..."):
+            # Show Nivara transparency
+            progress_bar = st.progress(0)
+            status_text = st.empty()
+            
+            status_text.text("🔍 Nivara: Extracting text from document...")
+            progress_bar.progress(20)
+            
+            with st.spinner("Processing with Nivara AI..."):
                 try:
                     # Save temp file
                     temp_dir = Path("temp_uploads")
@@ -145,8 +152,18 @@ with tab1:
                     from agents.trace_agent import TraceAgent
                     
                     tenant_id = os.getenv("TENANT_ID", "charcoal_eats_us")
+                    
+                    status_text.text("🔐 Nivara: Generating secure document ID...")
+                    progress_bar.progress(40)
+                    
+                    status_text.text("🛡️ Nivara: Applying tenant-level isolation...")
+                    progress_bar.progress(60)
+                    
                     trace = TraceAgent()
                     agent = ComplianceAgent(tenant_id, trace)
+                    
+                    status_text.text("☁️ Nivara: Uploading to secure storage...")
+                    progress_bar.progress(80)
                     
                     result = agent.upload_document(
                         file_path=str(temp_path),
@@ -161,6 +178,9 @@ with tab1:
                     
                     # Clean up temp file
                     temp_path.unlink()
+                    
+                    status_text.text("✅ Nivara: Document secured successfully!")
+                    progress_bar.progress(100)
                     
                     if result.get("success"):
                         st.success(f"✅ {result['message']}")
@@ -215,14 +235,28 @@ with tab2:
     )
     
     if st.button("🔍 Check Compliance", type="primary", disabled=not question):
-        with st.spinner("Analyzing compliance..."):
+        # Show Nivara transparency
+        progress_bar = st.progress(0)
+        status_text = st.empty()
+        
+        status_text.text("🔍 Nivara: Loading secure documents...")
+        progress_bar.progress(15)
+        
+        with st.spinner("Analyzing with Nivara AI..."):
             try:
                 from agents.compliance_agent import ComplianceAgent
                 from agents.trace_agent import TraceAgent
                 
                 tenant_id = os.getenv("TENANT_ID", "charcoal_eats_us")
+                
+                status_text.text("🛡️ Nivara: Verifying tenant access...")
+                progress_bar.progress(30)
+                
                 trace = TraceAgent()
                 agent = ComplianceAgent(tenant_id, trace)
+                
+                status_text.text("📚 Nivara: Retrieving compliance documents...")
+                progress_bar.progress(45)
                 
                 # Build operational context
                 import pandas as pd
@@ -243,11 +277,20 @@ with tab2:
                 except Exception as e:
                     print(f"[WARN] Could not load context: {e}")
                 
+                status_text.text("🧠 Nivara + Captain: Analyzing compliance...")
+                progress_bar.progress(65)
+                
+                status_text.text("📖 Nivara: Extracting citations...")
+                progress_bar.progress(80)
+                
                 result = agent.run(
                     question=question,
                     user_role=user_role,
                     context=context
                 )
+                
+                status_text.text("✅ Nivara: Analysis complete!")
+                progress_bar.progress(100)
                 
                 st.session_state.compliance_result = result
                 

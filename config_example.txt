@@ -1,0 +1,13 @@
+# Brew.AI Environment Configuration
+# Create a .env file in the project root with these variables:
+
+BROWSER_USE_API_KEY=bu_zlGdp05P86sdd6H2lTFHE43rpLbXRHMXKbXGE53hIQU
+GOOGLE_PLACES_API_KEY=AIzaSyAvUEtgR9OodyikazbFVrP_wD7sIhNfkDI
+GEMINI_API_KEY=AIzaSyCcw2F4nOy-5kkSSEdpfsK4LuDWcepspCY
+CHROME_USER_DATA_DIR=C:\Users\shryu\AppData\Local\Google\Chrome\User Data
+CHROME_PROFILE_DIR=Default
+TENANT_ID=charcoal_eats_us
+AUTO_CLICK_PLAN=true
+AUTO_SUBMIT_SUPPLIER=false
+USE_PINECONE=false
+

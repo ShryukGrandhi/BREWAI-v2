@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv
+
+# Streamlit
+.streamlit/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Artifacts (runtime generated)
+artifacts/
+*.log
+
+# Environment
+.env
+.env.local
+
+# Data
+data/orders.csv
+
+# Temp files
+*.tmp
+test_*.py
+

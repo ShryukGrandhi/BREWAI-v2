@@ -35,29 +35,29 @@ async def scrape_ubereats():
     dashboard_url = f"https://merchants.ubereats.com/manager/home/{restaurant_id}"
     
     async with async_playwright() as p:
-        print("[CHROME] Launching with your signed-in profile...")
+        print("[CHROME] Launching fresh Chrome instance...")
+        print("[INFO] This will open a new browser - you may need to log in to Uber Eats")
+        print()
         
-        user_data_dir = r"C:\Users\shryu\AppData\Local\Google\Chrome\User Data"
-        
-        context = await p.chromium.launch_persistent_context(
-            user_data_dir,
+        # Launch fresh browser (no profile conflicts!)
+        browser = await p.chromium.launch(
             headless=False,
             channel="chrome",
             args=[
-                '--profile-directory=Default',
                 '--disable-blink-features=AutomationControlled',
-                '--disable-dev-shm-usage'
+                '--start-maximized'
             ],
-            slow_mo=500,
-            ignore_default_args=['--enable-automation', '--enable-blink-features=AutomationControlled']
+            slow_mo=500
         )
         
-        # Get the first page (should be about:blank)
-        pages = context.pages
-        if pages:
-            page = pages[0]
-        else:
-            page = await context.new_page()
+        context = await browser.new_context(
+            viewport=None,  # Use full window
+            user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        )
+        
+        print("[OK] Chrome launched successfully!")
+        
+        page = await context.new_page()
         
         print(f"[GO] Navigating to Uber Eats Manager...")
         print(f"[URL] {dashboard_url}")

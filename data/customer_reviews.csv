@@ -1,17 +1,4 @@
 date,rating,review_text,sentiment,keywords,channel
-2025-10-28,5,"Best burger in NYC! So fresh and cheesy!",positive,"fresh,cheesy,delicious",google
-2025-10-29,4,"Good food but a bit too spicy for my taste",neutral,"spicy,good",yelp
-2025-10-29,5,"Fast service and perfectly cooked burger",positive,"fast,cooked,perfect",google
-2025-10-30,2,"Food arrived cold and the bag was open",negative,"cold,open,late",ubereats
-2025-10-30,5,"Love the cheese burger! Always fresh!",positive,"fresh,cheesy,love",google
-2025-10-31,3,"Decent but delivery was really slow",neutral,"slow,delivery",doordash
-2025-10-31,5,"Cooked to perfection every time",positive,"cooked,perfect",google
-2025-11-01,1,"Too spicy and arrived cold. Disappointed.",negative,"spicy,cold,disappointed",ubereats
-2025-11-01,5,"Fresh ingredients and great taste!",positive,"fresh,delicious,great",yelp
-2025-11-01,4,"Good burger but wish it was less spicy",neutral,"good,spicy",google
-2025-11-02,2,"Delivery was late and food was cold",negative,"late,cold,delivery",doordash
-2025-11-02,5,"Best fast food burger! Cheesy and fresh!",positive,"fresh,cheesy,best",google
-2025-11-02,4,"Good quality but sometimes too spicy",neutral,"good,spicy",yelp
-2025-11-02,5,"Cooked perfectly, love this place!",positive,"cooked,perfect,love",google
-2025-11-02,3,"Incomplete order, missing fries",neutral,"incomplete,missing",ubereats
-
+2025-11-01,5,Great food!,positive,great,ubereats
+2025-11-01,4,Good service,positive,good,ubereats
+2025-11-02,3,Average,neutral,average,ubereats

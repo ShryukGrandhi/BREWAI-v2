@@ -29,24 +29,24 @@ class BrowserUseClient:
         try:
             from langchain_google_genai import ChatGoogleGenerativeAI
             
-        base_llm = ChatGoogleGenerativeAI(
-            model="gemini-1.5-pro",
-            google_api_key=gemini_api_key,
-            temperature=0.2
-        )
-        
-        # Force add provider attribute for BrowserUse compatibility
-        # This must be set BEFORE any BrowserUse calls
-        object.__setattr__(base_llm, 'provider', 'google')
-        
-        # Verify it's set
-        if not hasattr(base_llm, 'provider'):
-            print("[ERROR] Failed to set provider attribute!")
-            raise AttributeError("Could not set LLM provider attribute")
-        
-        self.llm = base_llm
-        print("[OK] Gemini LLM initialized for BrowserUse")
-        print(f"[OK] LLM provider: {getattr(base_llm, 'provider', 'NOT SET')}")
+            base_llm = ChatGoogleGenerativeAI(
+                model="gemini-1.5-pro",
+                google_api_key=gemini_api_key,
+                temperature=0.2
+            )
+            
+            # Force add provider attribute for BrowserUse compatibility
+            # This must be set BEFORE any BrowserUse calls
+            object.__setattr__(base_llm, 'provider', 'google')
+            
+            # Verify it's set
+            if not hasattr(base_llm, 'provider'):
+                print("[ERROR] Failed to set provider attribute!")
+                raise AttributeError("Could not set LLM provider attribute")
+            
+            self.llm = base_llm
+            print("[OK] Gemini LLM initialized for BrowserUse")
+            print(f"[OK] LLM provider: {getattr(base_llm, 'provider', 'NOT SET')}")
             
         except Exception as e:
             print(f"[WARN] Gemini LLM initialization failed: {e}")
